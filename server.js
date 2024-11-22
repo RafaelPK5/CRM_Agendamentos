@@ -2,6 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import pool from './config/database.js';
 import agentRoutes from './routes/agentRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 
 const app = express();
 app.use(bodyParser.json());
@@ -16,6 +17,9 @@ pool.getConnection()
 
 // Rotas
 app.use('/agents', agentRoutes);
+app.use('/users', userRoutes);
+app.use('/appointment')
+
 
 // Inicializar o servidor
 const PORT = process.env.PORT || 3000;
