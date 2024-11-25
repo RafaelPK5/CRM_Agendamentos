@@ -1,26 +1,63 @@
-// models/appointmentModel.js
-import db from '../config/database.js';
+import db from "../config/database.js";
 
-export const getAppointments = async () => {
-  const query = 'SELECT * FROM appointments';
-  const [appointments] = await db.execute(query);
-  return appointments;
+export const createAppointment = async (
+  calendarId,
+  clientName,
+  date,
+  time,
+  meetingType,
+  reason
+) => {
+  const query = `
+        INSERT INTO appointments (calendar_id, client_name, appointment_date, appointment_time, meeting_type, reason)
+        VALUES (?, ?, ?, ?, ?, ?)
+    `;
+  const [result] = await db.query(query, [
+    calendarId,
+    clientName,
+    date,
+    time,
+    meetingType,
+    reason,
+  ]);
+  return result.insertId;
 };
 
-export const createAppointment = async (agent_id, client_id, appointment_date) => {
-  const query = 'INSERT INTO appointments (agent_id, client_id, appointment_date) VALUES (?, ?, ?)';
-  const [result] = await db.execute(query, [agent_id, client_id, appointment_date]);
-  return result;
+export const getAppointmentsByCalendarId = async (calendarId) => {
+  const query = `
+        SELECT * FROM appointments
+        WHERE calendar_id = ?
+        ORDER BY appointment_date, appointment_time
+    `;
+  const [rows] = await db.query(query, [calendarId]);
+  return rows;
 };
 
-export const updateAppointment = async (id, appointment_date, status) => {
-  const query = 'UPDATE appointments SET appointment_date = ?, status = ? WHERE id = ?';
-  const [result] = await db.execute(query, [appointment_date, status, id]);
-  return result;
+export const cancelAppointment = async (id) => {
+  const query = `
+        UPDATE appointments
+        SET status = 'cancelled'
+        WHERE id = ?
+    `;
+  const [result] = await db.query(query, [id]);
+  return result.affectedRows;
+};
+
+export const updateAppointmentDetails = async (id, appointmentDate, status) => {
+  const query = `
+        UPDATE appointments
+        SET appointment_date = ?, status = ?
+        WHERE id = ?
+    `;
+  const [result] = await db.query(query, [appointmentDate, status, id]);
+  return result.affectedRows;
 };
 
 export const deleteAppointment = async (id) => {
-  const query = 'DELETE FROM appointments WHERE id = ?';
-  const [result] = await db.execute(query, [id]);
-  return result;
+  const query = `
+        DELETE FROM appointments
+        WHERE id = ?
+    `;
+  const [result] = await db.query(query, [id]);
+  return result.affectedRows;
 };

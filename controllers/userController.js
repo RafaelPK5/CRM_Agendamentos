@@ -1,86 +1,109 @@
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import { getUserByEmail, createUser, updateUser, deleteUser, updateNameUserbyId } from '../models/user.js';
-import { sendWelcomeEmail } from '../utils/jwt.js'; // Supondo que você tenha a função de enviar email
+import {
+  createUser,
+  getUserByEmail,
+  updateUser,
+  deleteUser,
+  updateNameUserbyId,
+} from "../models/user.js";
+import { generateToken } from "../utils/jwt.js";
 
 export const registerUser = async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  // Verificar se o usuário já existe
-  const existingUser = await getUserByEmail(email);
-  if (existingUser) {
-    return res.status(400).json({ message: 'Usuário já existe' });
+    // Verifica se o e-mail já está registrado
+    const existingUser = await getUserByEmail(email);
+    if (existingUser) {
+      return res.status(400).json({ message: "E-mail já registrado." });
+    }
+
+    const newUser = await createUser(email, password);
+
+    res
+      .status(201)
+      .json({ message: "Usuário criado com sucesso.", user: newUser });
+  } catch (error) {
+    console.error("Erro ao registrar usuário:", error);
+    res.status(500).json({ message: "Erro ao registrar usuário." });
   }
-
-  // Criptografar a senha
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  // Criar o usuário
-  const userId = await createUser(email, hashedPassword);
-
-  // Enviar email de boas-vindas
-  sendWelcomeEmail(email);
-
-  res.status(201).json({ message: 'Usuário registrado com sucesso', userId });
 };
 
 export const loginUser = async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  // Buscar o usuário pelo email
-  const user = await getUserByEmail(email);
-  if (!user) {
-    return res.status(404).json({ message: 'Usuário não encontrado' });
+    // Busca o usuário pelo e-mail
+    const user = await getUserByEmail(email);
+    if (!user) {
+      return res.status(404).json({ message: "Usuário não encontrado." });
+    }
+
+    const isPasswordValid = await user.checkPassword(password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Credenciais inválidas." });
+    }
+
+    // Gera um token JWT
+    const token = generateToken({ id: user.id, email: user.email });
+
+    res.status(200).json({ message: "Login realizado com sucesso.", token });
+  } catch (error) {
+    console.error("Erro ao realizar login:", error);
+    res.status(500).json({ message: "Erro ao realizar login." });
   }
-
-  // Verificar se a senha está correta
-  const isPasswordCorrect = await bcrypt.compare(password, user.password);
-  if (!isPasswordCorrect) {
-    return res.status(401).json({ message: 'Senha incorreta' });
-  }
-
-  // Gerar o token JWT
-  const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-  res.status(200).json({ token });
 };
 
-export const updateUser = async (req, res) => {
-  const { userId } = req.params;
-  const { email, password } = req.body;
+export const updateUserInfo = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { email, password } = req.body;
 
-  // Criptografar a senha
-  const hashedPassword = await bcrypt.hash(password, 10);
+    const affectedRows = await updateUser(id, email, password);
 
-  const result = await updateUser(userId, email, hashedPassword);
+    if (affectedRows === 0) {
+      return res.status(404).json({ message: "Usuário não encontrado." });
+    }
 
-  if (result === 0) {
-    return res.status(404).json({ message: 'Usuário não encontrado' });
+    res.status(200).json({ message: "Usuário atualizado com sucesso." });
+  } catch (error) {
+    console.error("Erro ao atualizar usuário:", error);
+    res.status(500).json({ message: "Erro ao atualizar usuário." });
   }
-
-  res.status(200).json({ message: 'Usuário atualizado com sucesso' });
 };
 
-export const deleteUser = async (req, res) => {
-  const { userId } = req.params;
+export const updateUserName = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
 
-  const result = await deleteUser(userId);
+    const affectedRows = await updateNameUserbyId(id, name);
 
-  if (result === 0) {
-    return res.status(404).json({ message: 'Usuário não encontrado' });
+    if (affectedRows === 0) {
+      return res.status(404).json({ message: "Usuário não encontrado." });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Nome do usuário atualizado com sucesso." });
+  } catch (error) {
+    console.error("Erro ao atualizar nome do usuário:", error);
+    res.status(500).json({ message: "Erro ao atualizar nome do usuário." });
   }
-
-  res.status(200).json({ message: 'Usuário excluído com sucesso' });
 };
 
-export const updateNameUser = async (req,res) => {
-  const {userId} = req.params;
-  const {name} = req.body;
+export const deleteUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-  const result = await updateNameUserbyId(userId, name);
-  if (result === 0){
-    return res.status(404).json({message: 'Usuário não encontrado'})
+    const affectedRows = await deleteUser(id);
+
+    if (affectedRows === 0) {
+      return res.status(404).json({ message: "Usuário não encontrado." });
+    }
+
+    res.status(200).json({ message: "Usuário deletado com sucesso." });
+  } catch (error) {
+    console.error("Erro ao deletar usuário:", error);
+    res.status(500).json({ message: "Erro ao deletar usuário." });
   }
-
-  res.status(200).json({message: 'Nome alterado com sucesso'})
-}
+};
