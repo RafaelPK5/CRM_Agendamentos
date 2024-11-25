@@ -2,17 +2,17 @@
 import express from "express";
 import { authenticateToken } from "../middleware/auth.js";
 import {
-  getAllAppointments,
+  getAllAppointmentsByCalendar,
   createNewAppointment,
-  updateAppointmentDetails,
-  cancelAppointment,
+  updateAppointment,
+  cancelAppointmentById,
 } from "../controllers/appointmentController.js";
 
 const router = express.Router();
 
-router.get("/appointments", authenticateToken, getAllAppointments);
+router.get("/appointments", authenticateToken, getAllAppointmentsByCalendar);
 router.post("/appointments", authenticateToken, createNewAppointment);
-router.put("/appointments/:id", authenticateToken, updateAppointmentDetails);
-router.delete("/appointments/:id", authenticateToken, cancelAppointment);
+router.put("/appointments/:id", authenticateToken, updateAppointment);
+router.delete("/appointments/:id", authenticateToken, cancelAppointmentById);
 
 export default router;

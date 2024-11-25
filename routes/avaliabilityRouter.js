@@ -3,7 +3,7 @@ import {
   createNewAvailability,
   getAvailabilityByCalendar,
   deleteAvailabilityById,
-} from "../controllers/availabilityController.js";
+} from "../controllers/avaliabilityController.js";
 
 const router = express.Router();
 

@@ -8,12 +8,12 @@ import {
 } from "../controllers/userController.js";
 import { authenticateToken } from "../middleware/auth.js";
 
-const router = express.Router();
+const userRoutes = express.Router();
 
-router.post("/register", registerUser);
-router.post("/login", loginUser);
-router.put("/update/:id", authenticateToken, updateUserInfo);
-router.patch("/update-name/:id", authenticateToken, updateUserName);
-router.delete("/:id", authenticateToken, deleteUserById);
+userRoutes.post("/register", registerUser);
+userRoutes.post("/login", loginUser);
+userRoutes.put("/update/:id", authenticateToken, updateUserInfo);
+userRoutes.patch("/update-name/:id", authenticateToken, updateUserName);
+userRoutes.delete("/:id", authenticateToken, deleteUserById);
 
-export default router;
+export default userRoutes;

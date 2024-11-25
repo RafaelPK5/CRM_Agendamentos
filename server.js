@@ -1,9 +1,11 @@
 import express from "express";
 import bodyParser from "body-parser";
 import pool from "./config/database.js";
+import appointmentRoutes from "./routes/appointmentRoutes.js"
 import agentRoutes from "./routes/agentRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
-import availabilityRouter from "./routes/availabilityRouter.js";
+import availabilityRouter from "./routes/avaliabilityRouter.js";
+import calendarRouter from "./routes/calendarRouter.js"
 
 const app = express();
 app.use(bodyParser.json());
@@ -20,7 +22,7 @@ pool
 // Rotas
 app.use("/agents", agentRoutes);
 app.use("/users", userRoutes);
-app.use("/appointment");
+app.use("/appointment", appointmentRoutes);
 app.use("/api/availability", availabilityRouter);
 app.use("/api/calendars", calendarRouter);
 

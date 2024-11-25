@@ -2,7 +2,7 @@ import {
   createAvailability,
   getAvailabilityByCalendarId,
   deleteAvailability,
-} from "../models/availability.js";
+} from "../models/availabilities.js";
 
 export const createNewAvailability = async (req, res) => {
   const { calendarId, dayOfWeek, startTime, endTime } = req.body;

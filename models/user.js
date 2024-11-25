@@ -1,4 +1,4 @@
-import { pool } from "../config/database.js";
+import pool from "../config/database.js";
 import { hashPassword, comparePassword } from "../utils/password.js";
 
 export const getUserByEmail = async (email) => {

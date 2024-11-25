@@ -4,7 +4,7 @@ import {
   cancelAppointment,
   updateAppointmentDetails,
   deleteAppointment,
-} from "../models/appointments.js";
+} from "../models/appointment.js";
 
 export const getAllAppointmentsByCalendar = async (req, res) => {
   const { calendarId } = req.params;
